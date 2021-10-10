@@ -186,11 +186,12 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>./extlibs/lib/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>./extlibs64/lib/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>detours.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\MaiSense\Config.hpp" />
     <ClInclude Include="include\MaiSense\Sensor.hpp" />
     <ClInclude Include="include\MaiSense\InputController.hpp" />
     <ClInclude Include="include\MaiSense\InputManager.hpp" />

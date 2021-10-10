@@ -18,7 +18,9 @@ namespace MaiSense
         virtual void OnInput(int nCode, WPARAM wParam, LPARAM lParam);
 
     public:
+
         TouchController();
+
         virtual ~TouchController();
 
         virtual bool Check(int evCode);

@@ -6,6 +6,7 @@
 #include <thread>
 
 #include <MaiSense/Sensor.hpp>
+#include <MaiSense/Config.hpp>
 
 namespace MaiSense
 {

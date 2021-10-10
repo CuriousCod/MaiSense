@@ -12,26 +12,46 @@
 
 namespace MaiSense
 {
-	class SensorProcessor
-	{
-	private:
-        SensorChecker *checker;
-        Sensor *sensor;
+    class SensorProcessor
+    {
+    private:
+        SensorChecker* checker;
+        Sensor* sensor;
 
-	public:
+    public:
         SensorProcessor();
         virtual ~SensorProcessor();
 
-        SensorChecker *GetChecker();
-        Sensor *GetSensor();
+        SensorChecker* GetChecker();
+        Sensor* GetSensor();
 
-        void SetChecker(SensorChecker *checker);
-        void SetSensor(Sensor *sensor);
+        void SetChecker(SensorChecker* checker);
+        void SetSensor(Sensor* sensor);
 
         bool Handle(TouchEvent ev);
         bool Handle(MouseEvent ev);
-        bool Handle(const Point& pointer, bool active);
-	};
+        bool Handle(const Point& pointer, bool active, int eventId);
+
+        const int sensors[17] = {
+           Sensor::A1,
+           Sensor::A2,
+           Sensor::A3,
+           Sensor::A4,
+           Sensor::A5,
+           Sensor::A6,
+           Sensor::A7,
+           Sensor::A8,
+           Sensor::B1,
+           Sensor::B2,
+           Sensor::B3,
+           Sensor::B4,
+           Sensor::B5,
+           Sensor::B6,
+           Sensor::B7,
+           Sensor::B8,
+           Sensor::C
+        };
+    };
 }
 
 #endif

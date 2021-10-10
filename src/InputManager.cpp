@@ -119,7 +119,9 @@ namespace MaiSense
             lpParam
         );
 
-        if (!RegisterTouchWindow(hWnd, TWF_WANTPALM))
+        MaiSense::Config config(false);
+
+        if (!RegisterTouchWindow(hWnd, config.PreferAccuracy ? TWF_FINETOUCH : TWF_WANTPALM))
         {
             MessageBoxA(NULL, ("MAISENSE: Failed to register touch: " + std::to_string(GetLastError())).c_str(), "Hook", MB_ICONEXCLAMATION);
             CloseWindow(hWnd);

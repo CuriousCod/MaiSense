@@ -6,9 +6,12 @@
 #include <MaiSense/Sensor.hpp>
 #include <MaiSense/TouchController.hpp>
 #include <MaiSense/SensorRegion.hpp>
+#include <MaiSense/Config.hpp>
+
 
 namespace MaiSense
 {
+
 	class SensorChecker
 	{
 	private:
@@ -29,12 +32,14 @@ namespace MaiSense
 		const SensorRegion B6_REGION = SensorRegion({ { 415, 585 }, { 380, 500 }, { 200, 500 }, { 290, 710 } });
 		const SensorRegion B7_REGION = SensorRegion({ { 200, 500 }, { 380, 500 }, { 415, 415 }, { 290, 290 } });
 		const SensorRegion B8_REGION = SensorRegion({ { 290, 290 }, { 500, 200 }, { 500, 380 }, { 415, 415 } });
-		const int REF_SCREEN_WIDTH = 1000;
-		const int REF_SCREEN_HEIGHT = 1000;
+		int REF_SCREEN_WIDTH = 1000;
+		int REF_SCREEN_HEIGHT = 1000;
 
 		std::map<SensorId, SensorRegion> regionMap;
 		int screenWidth;
 		int screenHeight;
+
+		MaiSense::Config config;
 
 		void InitRegions();
 	public:
@@ -47,9 +52,9 @@ namespace MaiSense
 		void RemoveRegion(SensorId sensorId);
 		bool Check(Point position, SensorId sensorId);
 
-        int GetScreenWidth();
-        int GetScreenHeight();
-        void SetScreenSize(int width, int height);
+		int GetScreenWidth();
+		int GetScreenHeight();
+		void SetScreenSize(int width, int height);
 	};
 }
 

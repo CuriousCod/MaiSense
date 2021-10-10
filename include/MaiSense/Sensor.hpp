@@ -2,10 +2,14 @@
 #define MAISENSE_MAIN_HPP
 
 #include <string>
+#include <list>
 #include <windows.h>
 #include <unordered_map>
 #include <queue>
 #include <vector>
+
+#include <MaiSense/Config.hpp>
+#include <MaiSense/Point.hpp>
 
 typedef int SensorId;
 
@@ -25,15 +29,69 @@ namespace MaiSense
         {
             SensorId SensorId;
             bool Value;
+            int eventId;
+            Point point;
         };
 
         int* activeFlags;
         int* inactiveFlags;
         std::unordered_map<SensorId, bool> states;
+
+        // Add a new variable to track the inputs the sensors are currently receiving
+        std::unordered_map<SensorId, std::vector<int>> touchPoints;
+
+        // Position of the input event
+        std::unordered_map<int, Point> touchPosition;
+
         std::vector<Message> queue;
 
+        MaiSense::Config config;
+
+        const int sensors[17] = {
+          Sensor::A1,
+          Sensor::A2,
+          Sensor::A3,
+          Sensor::A4,
+          Sensor::A5,
+          Sensor::A6,
+          Sensor::A7,
+          Sensor::A8,
+          Sensor::B1,
+          Sensor::B2,
+          Sensor::B3,
+          Sensor::B4,
+          Sensor::B5,
+          Sensor::B6,
+          Sensor::B7,
+          Sensor::B8,
+          Sensor::C
+        };
+
+        const int outerSensors[8] = {
+          Sensor::A1,
+          Sensor::A2,
+          Sensor::A3,
+          Sensor::A4,
+          Sensor::A5,
+          Sensor::A6,
+          Sensor::A7,
+          Sensor::A8,
+        };
+
+        const int innerSensors[9] = {
+          Sensor::B1,
+          Sensor::B2,
+          Sensor::B3,
+          Sensor::B4,
+          Sensor::B5,
+          Sensor::B6,
+          Sensor::B7,
+          Sensor::B8,
+          Sensor::C
+        };
+
     public:
-        static const SensorId 
+        static const SensorId
             A1 = 1 << 0,
             B1 = 1 << 1,
             A2 = 1 << 2,
@@ -50,7 +108,7 @@ namespace MaiSense
             B7 = 1 << 16,
             A8 = 1 << 17,
             B8 = 1 << 18,
-            C  = 1 << 19;
+            C = 1 << 19;
 
         Sensor();
 
@@ -58,7 +116,8 @@ namespace MaiSense
 
         bool Connect();
         bool SetSensorState(SensorId sensorId, bool value);
-        void Queue(SensorId sensorId, bool value);
+        bool GetSensorState(SensorId sensorId);
+        void Queue(SensorId sensorId, bool value, int eventId, const Point& point);
 
         bool Activate(SensorId sensorId);
         bool Deactivate(SensorId sensorId);
@@ -66,6 +125,11 @@ namespace MaiSense
 
         bool ProcessQueue();
         void Reset();
+
+        int FindIndex(std::vector<int> v, int K);
+        bool InVector(std::vector<int> v, int K);
+        void SlideAssist(SensorId sensorId);
+
     };
 }
 
