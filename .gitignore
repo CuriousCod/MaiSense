@@ -19,6 +19,8 @@
 [Xx]64/
 [Xx]86/
 bld/
+build
+_build
 [Bb]in/
 [Oo]bj/
 
