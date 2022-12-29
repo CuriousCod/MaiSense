@@ -22,6 +22,7 @@ namespace MaiSense
 
         virtual bool Check(int evCode);
         void SetCallback(std::function<void(KeyEvent)> cb);
+        static void ProcessKeyboardInput(KeyEvent ev);
     };
 }
 

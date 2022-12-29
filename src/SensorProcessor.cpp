@@ -2,72 +2,72 @@
 
 namespace MaiSense
 {
-    SensorProcessor::SensorProcessor() :
-        checker(0),
-        sensor(0)
+    SensorProcessor::SensorProcessor() : checker_(nullptr), sensor_(nullptr) {}
+
+    SensorProcessor::~SensorProcessor() = default;
+
+    SensorChecker* SensorProcessor::GetChecker() const
     {
+        return this->checker_;
     }
 
-    SensorProcessor::~SensorProcessor()
+    Sensor* SensorProcessor::GetSensor() const
     {
-    }
-
-    SensorChecker* SensorProcessor::GetChecker()
-    {
-        return this->checker;
-    }
-
-    Sensor* SensorProcessor::GetSensor()
-    {
-        return this->sensor;
+        return this->sensor_;
     }
 
     void SensorProcessor::SetChecker(SensorChecker* checker)
     {
-        this->checker = checker;
+        this->checker_ = checker;
     }
 
     void SensorProcessor::SetSensor(Sensor* sensor)
     {
-        this->sensor = sensor;
+        this->sensor_ = sensor;
     }
 
-    bool SensorProcessor::Handle(TouchEvent ev)
+    bool SensorProcessor::HandleTouchEvent(const TouchEvent ev) const
     {
         bool active = !(ev.Flag & POINTER_FLAG_UP || ev.Flag & POINTER_FLAG_CANCELED); // Check if the touch input entered the touch area / is moving on the touch area / left the touch area
 
         //return Handle({ev.X, ev.Y}, ev.Flag);
-        return Handle({ ev.X, ev.Y }, active, ev.Id); // This will break mouse support if touch emulation is used
+        return HandleSensorEvent({ ev.X, ev.Y }, active, ev.Id); // This will break mouse support if touch emulation is used
     }
 
-    bool SensorProcessor::Handle(MouseEvent ev)
+    bool SensorProcessor::HandleMouseEvent(const MouseEvent ev) const
     {
         // Set mouse click eventId as static -2, so it won't conflict with the incrementing touch event IDs
-        return Handle({ ev.X, ev.Y }, ev.LButton, -2); 
+        return HandleSensorEvent({ ev.X, ev.Y }, ev.LButton, -2);
     }
 
-    bool SensorProcessor::Handle(const Point& pointer, bool active, int eventId) // Added eventId as an argument to track the movement of the input
+    bool SensorProcessor::HandleSensorEvent(const Point& pointer, const bool active, const int event_id) const // Added eventId as an argument to track the movement of the input
     {
-        if (this->checker == NULL)
-            return false;
-
-        if (this->sensor == NULL)
-            return false;
-
-        for (const auto& sensorId : sensors)
+        if (this->checker_ == nullptr)
         {
-            if (checker->Check(pointer, sensorId))
-            {
-                // Input event is hitting a sensor, send sensor and status to the queue
-                // active bool can be false here, if the input is lifted on top of the sensor
-                sensor->Queue(sensorId, active, eventId, pointer);
+            return false;
+        }
 
-                return true;
+        if (this->sensor_ == nullptr)
+        {
+            return false;
+        }
+
+        for (const auto& sensor_id : sensors)
+        {
+            if (!checker_->Check(pointer, sensor_id))
+            {
+                continue;
             }
+
+            // Input event is hitting a sensor, send sensor and status to the queue
+            // active bool can be false here, if the input is lifted on top of the sensor
+            sensor_->Queue(sensor_id, active, event_id, pointer);
+
+            return true;
         }
 
         // Input event is not hitting any sensors, send sensor as -1 and bool as false to the queue
-        sensor->Queue(-1, false, eventId, pointer);
+        sensor_->Queue(-1, false, event_id, pointer);
 
         return false;
     }

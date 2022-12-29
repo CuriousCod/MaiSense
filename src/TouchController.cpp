@@ -1,24 +1,20 @@
 #include <MaiSense/TouchController.hpp>
 #include <MaiSense/Config.hpp>
 #include <string>
+#include <utility>
 
 namespace MaiSense
 {
-    TouchController::TouchController() :
-        callback()
-    {        
-    }
+    TouchController::TouchController() = default;
 
-    TouchController::~TouchController()
-    {
-    }
+    TouchController::~TouchController() = default;
 
     void TouchController::SetCallback(std::function<void(TouchEvent)> cb)
     {
-        callback = cb;
+        callback = std::move(cb);
     }
 
-    bool TouchController::Check(int evCode)
+    bool TouchController::Check(const int evCode)
     {
         switch (evCode)
         {
@@ -44,27 +40,29 @@ namespace MaiSense
         auto msg = (LPMSG)lParam;
 
         // Declare pointer info
-        UINT32             pointerId = GET_POINTERID_WPARAM(msg->wParam);
-        POINTER_INFO       pointerInfo = { sizeof(POINTER_INFO) };
-        POINTER_INPUT_TYPE pointerType = 0;
+        const UINT32       pointer_id = GET_POINTERID_WPARAM(msg->wParam);
+        POINTER_INFO       pointer_info = { sizeof(POINTER_INFO) };
+        POINTER_INPUT_TYPE pointer_type = 0;
 
         // Parse pointer info
-        if (GetPointerType(pointerId, &pointerType) && GetPointerInfo(pointerId, &pointerInfo))
+        if (GetPointerType(pointer_id, &pointer_type) && GetPointerInfo(pointer_id, &pointer_info))
         {
             // Only retrieve touch event and map coordinate into client coordinate
-            POINT point = pointerInfo.ptPixelLocation;
-            if (pointerType == PT_TOUCH && ScreenToClient(msg->hwnd, &point))
+            POINT point = pointer_info.ptPixelLocation;
+            if (pointer_type == PT_TOUCH && ScreenToClient(msg->hwnd, &point))
             {
                 // Initialize touch event
                 auto ev = TouchEvent();
-                ev.Id = pointerInfo.pointerId;
+                ev.Id = pointer_info.pointerId;
                 ev.X = point.x;
                 ev.Y = point.y;
-                ev.Flag = pointerInfo.pointerFlags;
+                ev.Flag = pointer_info.pointerFlags;
                     
                 // Pass event into callback
                 if (callback)
+                {
                     callback(ev);
+                }
             }
         }
     }

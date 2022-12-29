@@ -11,23 +11,23 @@ namespace MaiSense
 	class SensorRegion
 	{
 	private:
-		const int COLINEAR = 0;
-		const int CLOCKWISE = 1;
-		const int COUNTER_CLOCKWISE = 2;
+		static constexpr int COLINEAR = 0;
+		static constexpr int CLOCKWISE = 1;
+		static constexpr int COUNTER_CLOCKWISE = 2;
 
 		std::vector<Point> points;
 
-		bool IsOnSegment(const Point& p, const Point& q, const Point& r);
-		int FindOrientation(const Point& p, const Point& q, const Point& r);
-		bool DoesSegmentIntersect(const Point& p1, const Point& q1, const Point& p2, const Point& q2);
+		static bool IsOnSegment(const Point& p, const Point& q, const Point& r);
+		static int FindOrientation(const Point& p, const Point& q, const Point& r);
+		static bool DoesSegmentIntersect(const Point& p1, const Point& q1, const Point& p2, const Point& q2);
 
 	public:
 		SensorRegion();
-		SensorRegion(const std::vector<Point>& points);
+		explicit SensorRegion(const std::vector<Point>& points);
 		~SensorRegion();
 
 		void AddPoint(const Point& point);
-		bool Test(const Point& testPoint, float scaleX = 1.0, float scaleY = 1.0f);
+		bool Test(const Point& test_point, float scale_x = 1.0, float scale_y = 1.0f) const;
 	};
 }
 

@@ -69,7 +69,9 @@ namespace MaiSense
     Sensor *InputManager::GetSensor()
     {
         if (!sensor)
+        {
             sensor = new Sensor();
+        }
 
         return sensor;
     }
@@ -119,23 +121,24 @@ namespace MaiSense
             lpParam
         );
 
-        MaiSense::Config config(false);
+        const Config config(false);
 
         if (!RegisterTouchWindow(hWnd, config.PreferAccuracy ? TWF_FINETOUCH : TWF_WANTPALM))
         {
-            MessageBoxA(NULL, ("MAISENSE: Failed to register touch: " + std::to_string(GetLastError())).c_str(), "Hook", MB_ICONEXCLAMATION);
+            MessageBoxA(nullptr, ("MAISENSE: Failed to register touch: " + std::to_string(GetLastError())).c_str(), "Hook", MB_ICONEXCLAMATION);
             CloseWindow(hWnd);
 
-            return NULL;
+            return nullptr;
         }
 
         hHook = SetWindowsHookEx(WH_GETMESSAGE, GetMsgProc, hInstance, GetCurrentThreadId());
-        if (hHook == NULL)
+
+        if (hHook == nullptr)
         {
-            MessageBoxA(NULL, ("MAISENSE: Failed to install hook: " + std::to_string(GetLastError())).c_str(), "Hook", MB_ICONEXCLAMATION);
+            MessageBoxA(nullptr, ("MAISENSE: Failed to install hook: " + std::to_string(GetLastError())).c_str(), "Hook", MB_ICONEXCLAMATION);
             CloseWindow(hWnd);
 
-            return NULL;
+            return nullptr;
         }
 
         return hWnd;
@@ -144,12 +147,16 @@ namespace MaiSense
     LRESULT WINAPI InputManager::GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam)
     {
         auto msg = (LPMSG)lParam;
-        if (nCode >= 0 && msg != NULL)
+        if (nCode >= 0 && msg != nullptr)
         {
-            for (auto controller : controllers)
+            for (const auto controller : controllers)
             {
-                if (controller->Check(msg->message))
-                    controller->OnInput(nCode, wParam, lParam);
+                if (!controller->Check(msg->message))
+                {
+                    continue;
+                }
+
+                controller->OnInput(nCode, wParam, lParam);
             }
         }
 
@@ -159,7 +166,7 @@ namespace MaiSense
     DWORD __stdcall InputManager::HookGameInput()
     {
         GetSensor()->Reset();
-        auto result = TrueGameInput();
+        const auto result = TrueGameInput();
         GetSensor()->ProcessQueue();
 
         return result;

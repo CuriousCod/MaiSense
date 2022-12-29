@@ -116,6 +116,7 @@ namespace MaiSense
 
         bool Connect();
         bool SetSensorState(SensorId sensorId, bool value);
+        void SetSensorStateAsync(SensorId sensor_id, bool value);
         bool GetSensorState(SensorId sensorId);
         void Queue(SensorId sensorId, bool value, int eventId, const Point& point);
 
@@ -126,8 +127,8 @@ namespace MaiSense
         bool ProcessQueue();
         void Reset();
 
-        int FindIndex(std::vector<int> v, int K);
-        bool InVector(std::vector<int> v, int K);
+        int FindIndex(std::vector<int> v, int k) const;
+        bool InVector(std::vector<int> v, int k) const;
         void SlideAssist(SensorId sensorId);
 
     };

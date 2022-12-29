@@ -14,32 +14,32 @@ namespace MaiSense
 		this->InitRegions();
 	}
 
-	SensorChecker::SensorChecker(int screenWidth, int screenHeight)
+	SensorChecker::SensorChecker(const int screen_width, const int screen_height)
 	{
-		this->screenWidth = screenWidth;
-		this->screenHeight = screenHeight;
+		this->screenWidth = screen_width;
+		this->screenHeight = screen_height;
 		this->InitRegions();
 	}
 
-	SensorChecker::SensorChecker(int screenWidth, int screenHeight, const std::map<SensorId, SensorRegion>& regionMap)
+	SensorChecker::SensorChecker(const int screen_width, const int screen_height, const std::map<SensorId, SensorRegion>& region_map)
 	{
-		this->screenWidth = screenWidth;
-		this->screenHeight = screenHeight;
+		this->screenWidth = screen_width;
+		this->screenHeight = screen_height;
 		this->InitRegions();
-		this->regionMap.insert(regionMap.begin(), regionMap.end());
+		this->regionMap.insert(region_map.begin(), region_map.end());
 	}
 
-	SensorChecker::~SensorChecker()
-	{
-	}
+	SensorChecker::~SensorChecker() = default;
 
 	void SensorChecker::InitRegions()
 	{		
-		if (config.SensorRegions != NULL ){
+		if (config.SensorRegions != NULL )
+		{
 
 			json r = config.SensorRegions;
 
-			try {
+			try
+			{
 				this->AddRegion(Sensor::C, SensorRegion({ {r["C_REGION"][0][0], r["C_REGION"][0][1]}, {r["C_REGION"][1][0], r["C_REGION"][1][1]}, {r["C_REGION"][2][0], r["C_REGION"][2][1]}, {r["C_REGION"][3][0], r["C_REGION"][3][1]}, {r["C_REGION"][4][0], r["C_REGION"][4][1]}, {r["C_REGION"][5][0], r["C_REGION"][5][1]}, {r["C_REGION"][6][0], r["C_REGION"][6][1]}, {r["C_REGION"][7][0], r["C_REGION"][7][1]} }));
 				this->AddRegion(Sensor::A1, SensorRegion({ {r["A1_REGION"][0][0], r["A1_REGION"][0][1]}, {r["A1_REGION"][1][0], r["A1_REGION"][1][1]}, {r["A1_REGION"][2][0], r["A1_REGION"][2][1]}, {r["A1_REGION"][3][0], r["A1_REGION"][3][1]} }));
 				this->AddRegion(Sensor::A2, SensorRegion({ {r["A2_REGION"][0][0], r["A2_REGION"][0][1]}, {r["A2_REGION"][1][0], r["A2_REGION"][1][1]}, {r["A2_REGION"][2][0], r["A2_REGION"][2][1]}, {r["A2_REGION"][3][0], r["A2_REGION"][3][1]} }));
@@ -59,18 +59,20 @@ namespace MaiSense
 				this->AddRegion(Sensor::B8, SensorRegion({ {r["B8_REGION"][0][0], r["B8_REGION"][0][1]}, {r["B8_REGION"][1][0], r["B8_REGION"][1][1]}, {r["B8_REGION"][2][0], r["B8_REGION"][2][1]}, {r["B8_REGION"][3][0], r["B8_REGION"][3][1]} }));
 
 				// Check config for maimai screen layout
-				int divider = config.OnePlayerOnly ? 1 : 2;
+				const int divider = config.OnePlayerOnly ? 1 : 2;
 
 				REF_SCREEN_WIDTH = config.RefScreenWidth / divider; // Software only supports one maimai screen at the moment, so divide the width by 2 if maimai is in two player mode
 				REF_SCREEN_HEIGHT = config.RefScreenHeight;
 			}
-			catch (exception e) {
+			catch (exception e)
+			{
 				MessageBoxA(NULL, "Could not load sensor region or ref_screen data from the config.", "Config Error", MB_ICONEXCLAMATION);
 				exit(EXIT_FAILURE);
 			}
 
 		}
-		else {
+		else
+		{
 			this->AddRegion(Sensor::C, C_REGION);
 			this->AddRegion(Sensor::A1, A1_REGION);
 			this->AddRegion(Sensor::A2, A2_REGION);
@@ -101,32 +103,34 @@ namespace MaiSense
 		this->regionMap.erase(sensorId);
 	}
 
-	bool SensorChecker::Check(Point position, SensorId sensorId)
+	bool SensorChecker::Check(const Point position, const SensorId sensor_id)
 	{
+		// auto  sensor = InputManager::GetSensor();
 
-		auto  sensor = InputManager::GetSensor();
-		float scaleX = this->screenWidth / (float)REF_SCREEN_WIDTH;
-		float scaleY = this->screenHeight / (float)REF_SCREEN_HEIGHT;
+		const float scale_x = this->screenWidth / (float)REF_SCREEN_WIDTH;
+		const float scale_y = this->screenHeight / (float)REF_SCREEN_HEIGHT;
 
-		if (this->regionMap.count(sensorId) <= 0)
+		if (this->regionMap.count(sensor_id) <= 0)
+		{
 			return false;
+		}
 
-		return this->regionMap[sensorId].Test(position, scaleX, scaleY);
+		return this->regionMap[sensor_id].Test(position, scale_x, scale_y);
 	}
 
-	int SensorChecker::GetScreenWidth()
+	int SensorChecker::GetScreenWidth() const
 	{
 		return this->screenWidth;
 	}
 
-	int SensorChecker::GetScreenHeight()
+	int SensorChecker::GetScreenHeight() const
 	{
 		return this->screenHeight;
 	}
 
-	void SensorChecker::SetScreenSize(int width, int height)
+	void SensorChecker::SetScreenSize(const int width, const int height)
 	{
-		int divider = config.OnePlayerOnly ? 1 : 2;
+		const int divider = config.OnePlayerOnly ? 1 : 2;
 
 		this->screenWidth = width / divider; // Software only supports one maimai screen at the moment, so divide the width by 2 if maimai is in two player mode
 		this->screenHeight = height;

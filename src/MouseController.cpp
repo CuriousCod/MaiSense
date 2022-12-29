@@ -1,29 +1,24 @@
 #include <MaiSense/MouseController.hpp>
 #include <string>
 #include <iostream>
+#include <utility>
 
 namespace MaiSense
 {
-    MouseController::MouseController() :
-        callback(),
-        contact(),
-        touchEmulationActive(false),
-        prevEvent()
-    {
-    }
+    MouseController::MouseController() : contact(), touchEmulationActive(false), prevEvent() {}
 
-    MouseController::~MouseController()
-    {
-    }
+    MouseController::~MouseController() = default;
 
     void MouseController::EmulateTouch()
     {
         if (touchEmulationActive)
+        {
             return;
+        }
 
         touchEmulationActive = true;
         
-        // Setup touch contact (only use single contact, there's only single mouse after all)
+        // Setup touch contact (only use single contact, there's only a single mouse pointer after all)
         contact = { sizeof(POINTER_TOUCH_INFO) };
         contact.pointerInfo.pointerType = PT_TOUCH;
         contact.pointerInfo.pointerId = 0;
@@ -36,12 +31,14 @@ namespace MaiSense
 
         // Initialize touch injection
         if (!InitializeTouchInjection(MAX_CONTACT_SIMULATION, TOUCH_FEEDBACK_DEFAULT))
-            MessageBoxA(NULL, ("MAISENSE: Failed to register touch injection: " + std::to_string(GetLastError())).c_str(), "MaiSense", MB_ICONEXCLAMATION);
+        {
+            MessageBoxA(nullptr, ("MAISENSE: Failed to register touch injection: " + std::to_string(GetLastError())).c_str(), "MaiSense", MB_ICONEXCLAMATION);
+        }
     }
 
     void MouseController::SetCallback(std::function<void(MouseEvent)> cb)
     {
-        callback = cb;
+        callback = std::move(cb);
     }
 
     bool MouseController::Check(int evCode)
@@ -141,7 +138,9 @@ namespace MaiSense
             // Pass event into callback
             prevEvent = ev;
             if (callback)
+            {
                 callback(ev);
+            }
         }
     }
 }
