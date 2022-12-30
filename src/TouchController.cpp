@@ -1,6 +1,5 @@
 #include <MaiSense/TouchController.hpp>
 #include <MaiSense/Config.hpp>
-#include <string>
 #include <utility>
 
 namespace MaiSense

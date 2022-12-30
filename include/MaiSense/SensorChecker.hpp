@@ -35,7 +35,7 @@ namespace MaiSense
 		int REF_SCREEN_WIDTH = 1000;
 		int REF_SCREEN_HEIGHT = 1000;
 
-		std::map<SensorId, SensorRegion> regionMap;
+		std::map<sensor_id, SensorRegion> regionMap;
 		int screenWidth;
 		int screenHeight;
 
@@ -45,12 +45,12 @@ namespace MaiSense
 	public:
 		SensorChecker();
 		SensorChecker(int screen_width, int screen_height);
-		SensorChecker(int screen_width, int screen_height, const std::map<SensorId, SensorRegion>& region_map);
+		SensorChecker(int screen_width, int screen_height, const std::map<sensor_id, SensorRegion>& region_map);
 		~SensorChecker();
 
-		void AddRegion(SensorId sensorId, const SensorRegion& region);
-		void RemoveRegion(SensorId sensorId);
-		bool Check(Point position, SensorId sensor_id);
+		void AddRegion(sensor_id sensorId, const SensorRegion& region);
+		void RemoveRegion(sensor_id sensorId);
+		bool Check(Point position, sensor_id sensor_id);
 
 		int GetScreenWidth() const;
 		int GetScreenHeight() const;

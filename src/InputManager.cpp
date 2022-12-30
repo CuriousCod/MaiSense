@@ -166,6 +166,7 @@ namespace MaiSense
     DWORD __stdcall InputManager::HookGameInput()
     {
         GetSensor()->Reset();
+        // GetSensor()->DisplayDebug();
         const auto result = TrueGameInput();
         GetSensor()->ProcessQueue();
 

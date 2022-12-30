@@ -11,7 +11,8 @@
 #include <MaiSense/Config.hpp>
 #include <MaiSense/Point.hpp>
 
-typedef int SensorId;
+typedef int sensor_id;
+typedef int event_id;
 
 namespace MaiSense
 {
@@ -25,29 +26,29 @@ namespace MaiSense
         const int P1_OFFSET_INACTIVE_ADDRESS = 60;
         const int P2_OFFSET_INACTIVE_ADDRESS = 64;
 
-        struct Message
+        struct sensor_event
         {
-            SensorId SensorId;
-            bool Value;
-            int eventId;
-            Point point;
+            sensor_id sensor_id;
+            bool state;
+            int event_id;
+            Point touch_point;
         };
 
-        int* activeFlags;
-        int* inactiveFlags;
-        std::unordered_map<SensorId, bool> states;
+        int* active_sensor_flags_;
+        int* inactive_sensor_flags_;
+        std::unordered_map<sensor_id, bool> sensor_states_;
 
         // Add a new variable to track the inputs the sensors are currently receiving
-        std::unordered_map<SensorId, std::vector<int>> touchPoints;
+        std::unordered_map<sensor_id, std::vector<event_id>> sensor_touch_event_map_;
 
         // Position of the input event
-        std::unordered_map<int, Point> touchPosition;
+        std::unordered_map<event_id, Point> touch_point_map_;
 
-        std::vector<Message> queue;
+        std::vector<sensor_event> sensor_event_queue_;
 
-        MaiSense::Config config;
+        Config config_;
 
-        const int sensors[17] = {
+        const int sensors_[17] = {
           Sensor::A1,
           Sensor::A2,
           Sensor::A3,
@@ -67,7 +68,7 @@ namespace MaiSense
           Sensor::C
         };
 
-        const int outerSensors[8] = {
+        const int outer_sensors_[8] = {
           Sensor::A1,
           Sensor::A2,
           Sensor::A3,
@@ -78,7 +79,7 @@ namespace MaiSense
           Sensor::A8,
         };
 
-        const int innerSensors[9] = {
+        const int inner_sensors_[9] = {
           Sensor::B1,
           Sensor::B2,
           Sensor::B3,
@@ -91,7 +92,7 @@ namespace MaiSense
         };
 
     public:
-        static const SensorId
+        static const sensor_id
             A1 = 1 << 0,
             B1 = 1 << 1,
             A2 = 1 << 2,
@@ -115,22 +116,24 @@ namespace MaiSense
         ~Sensor();
 
         bool Connect();
-        bool SetSensorState(SensorId sensorId, bool value);
-        void SetSensorStateAsync(SensorId sensor_id, bool value);
-        bool GetSensorState(SensorId sensorId);
-        void Queue(SensorId sensorId, bool value, int eventId, const Point& point);
+        bool SetSensorState(sensor_id sensor_id, bool state);
+        void SetSensorStateAsync(sensor_id sensor_id, bool value);
+        bool GetSensorState(sensor_id sensorId);
+        bool GetSensorActiveStateFromPointerFlag(sensor_id sensor_id) const;
+        bool GetSensorInactiveStateFromPointerFlag(sensor_id sensor_id) const;
+        void Queue(sensor_id sensorId, bool value, int eventId, const Point& point);
 
-        bool Activate(SensorId sensorId);
-        bool Deactivate(SensorId sensorId);
-        bool Remove(SensorId sensorId, bool value);
+        bool Activate(sensor_id sensorId);
+        bool Deactivate(sensor_id sensorId);
+        bool Remove(sensor_id sensorId, bool value);
 
         bool ProcessQueue();
         void Reset();
 
         int FindIndex(std::vector<int> v, int k) const;
         bool InVector(std::vector<int> v, int k) const;
-        void SlideAssist(SensorId sensorId);
-
+        void SlideAssist(sensor_id sensorId);
+        void DisplayDebug() const;
     };
 }
 

@@ -28,7 +28,7 @@ namespace MaiSense
 
     bool SensorProcessor::HandleTouchEvent(const TouchEvent ev) const
     {
-        bool active = !(ev.Flag & POINTER_FLAG_UP || ev.Flag & POINTER_FLAG_CANCELED); // Check if the touch input entered the touch area / is moving on the touch area / left the touch area
+        const bool active = !(ev.Flag & POINTER_FLAG_UP || ev.Flag & POINTER_FLAG_CANCELED); // Check if the touch input entered the touch area / is moving on the touch area / left the touch area
 
         //return Handle({ev.X, ev.Y}, ev.Flag);
         return HandleSensorEvent({ ev.X, ev.Y }, active, ev.Id); // This will break mouse support if touch emulation is used

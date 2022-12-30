@@ -21,7 +21,7 @@ namespace MaiSense
 		this->InitRegions();
 	}
 
-	SensorChecker::SensorChecker(const int screen_width, const int screen_height, const std::map<SensorId, SensorRegion>& region_map)
+	SensorChecker::SensorChecker(const int screen_width, const int screen_height, const std::map<sensor_id, SensorRegion>& region_map)
 	{
 		this->screenWidth = screen_width;
 		this->screenHeight = screen_height;
@@ -93,17 +93,17 @@ namespace MaiSense
 		}
 	}
 
-	void SensorChecker::AddRegion(SensorId sensorId, const SensorRegion& region)
+	void SensorChecker::AddRegion(sensor_id sensorId, const SensorRegion& region)
 	{
-		this->regionMap.insert(std::pair<SensorId, SensorRegion>(sensorId, region));
+		this->regionMap.insert(std::pair<sensor_id, SensorRegion>(sensorId, region));
 	}
 
-	void SensorChecker::RemoveRegion(SensorId sensorId)
+	void SensorChecker::RemoveRegion(sensor_id sensorId)
 	{
 		this->regionMap.erase(sensorId);
 	}
 
-	bool SensorChecker::Check(const Point position, const SensorId sensor_id)
+	bool SensorChecker::Check(const Point position, const sensor_id sensor_id)
 	{
 		// auto  sensor = InputManager::GetSensor();
 
