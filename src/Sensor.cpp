@@ -194,10 +194,10 @@ namespace MaiSense
                         touch_point_map_[sensor_event.event_id] = sensor_event.touch_point; // Add input's current position to the map
                     }
 
-                    // if (is_inner_sensor)
-                    // {
-                    //     SetSensorState(message.SensorId, false); // Retrigger inner sensor every time, this helps with slides
-                    // }
+                    if (is_inner_sensor)
+                    {
+                        SetSensorState(sensor_event.sensor_id, false); // Retrigger inner sensor every time, this helps with slides
+                    }
 
                     /*
                     else if (touchPoints[message.SensorId].size() > 2)
