@@ -21,6 +21,7 @@
 bld/
 build
 _build
+temp/
 [Bb]in/
 [Oo]bj/
 
