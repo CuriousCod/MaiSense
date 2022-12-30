@@ -41,6 +41,8 @@ namespace MaiSense
 
     Process Process::Create(std::string path, std::string args, bool suspended)
     {
+        const auto work_directory = path.substr(0, path.find_last_of("\\/"));
+
         STARTUPINFO si = { sizeof(si) };
         PROCESS_INFORMATION pi;
         bool success = CreateProcess(
@@ -51,7 +53,7 @@ namespace MaiSense
             TRUE,
             suspended ? CREATE_SUSPENDED : 0,
             NULL,
-            NULL,
+            work_directory.c_str(),
             &si,
             &pi
         );
