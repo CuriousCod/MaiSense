@@ -1,6 +1,6 @@
 #include <MaiSense/Sensor.hpp>
+#include <MaiSense/Helpers.hpp>
 #include <future>
-#include <execution>
 
 namespace MaiSense
 {
@@ -219,7 +219,7 @@ namespace MaiSense
         const bool is_inner_sensor = std::find(std::begin(inner_sensors_), std::end(inner_sensors_), sensor_event.sensor_id) != std::end(inner_sensors_);
 
         // Add input to the sensor's vector
-        if (!InVector(sensor_touch_event_map_[sensor_event.sensor_id], sensor_event.event_id))
+        if (!Helpers::IsInVector(sensor_touch_event_map_[sensor_event.sensor_id], sensor_event.event_id))
         {
             RegisterTouchEvent(sensor_event, is_inner_sensor);
         }
@@ -271,7 +271,7 @@ namespace MaiSense
                 continue;
             }
 
-            int index = FindIndex(sensor_touch_event_map_[sensor_id], sensor_event.event_id);
+            int index = Helpers::FindIndexFromVector(sensor_touch_event_map_[sensor_id], sensor_event.event_id);
 
             if (index == -1)
             {
@@ -317,7 +317,7 @@ namespace MaiSense
         // Remove event from sensors' vector
         for (const auto& sensor_id : sensors_)
         {
-            const int index = FindIndex(sensor_touch_event_map_[sensor_id], sensor_event.event_id);
+            const int index = Helpers::FindIndexFromVector(sensor_touch_event_map_[sensor_id], sensor_event.event_id);
 
             if (index == -1)
             {
@@ -348,38 +348,6 @@ namespace MaiSense
         // Reset sensor bitflag each game frame
         *active_sensor_flags_ = 0;
         *inactive_sensor_flags_ = 0;
-    }
-
-    /**
-     * \brief Find the index of a value in a int vector
-     * \param v Vector to search
-     * \param k Value to search for
-     * \return Index of the value in the vector, or -1 if not found
-     */
-    int Sensor::FindIndex(std::vector<int> v, const int k) const
-    {
-        const auto& it = std::find(v.begin(), v.end(), k);
-
-        // If element was found
-        if (it != v.end())
-        {
-            int index = it - v.begin();
-            return index;
-        }
-
-        return -1;
-    }
-
-    /**
-     * \brief Check if a value is in a int vector
-     * \param v Vector to search
-     * \param k Value to search for
-     * \return True if the value is in the vector, false otherwise
-     */
-    bool Sensor::InVector(std::vector<int> v, const int k) const
-    {
-        // https://stackoverflow.com/questions/24139428/check-if-element-is-in-the-list-contains
-        return std::find(v.begin(), v.end(), k) != v.end();
     }
 
     void Sensor::ApplySlideAssist(sensor_id sensorId)

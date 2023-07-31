@@ -192,6 +192,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\MaiSense\Config.hpp" />
+    <ClInclude Include="include\MaiSense\Helpers.hpp" />
     <ClInclude Include="include\MaiSense\Sensor.hpp" />
     <ClInclude Include="include\MaiSense\InputController.hpp" />
     <ClInclude Include="include\MaiSense\InputManager.hpp" />
@@ -208,6 +209,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\dllmain.cpp" />
+    <ClCompile Include="src\Helpers.cpp" />
     <ClCompile Include="src\Sensor.cpp" />
     <ClCompile Include="src\InputManager.cpp" />
     <ClCompile Include="src\KeyboardController.cpp" />

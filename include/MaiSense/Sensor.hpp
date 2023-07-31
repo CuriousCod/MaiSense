@@ -135,8 +135,6 @@ namespace MaiSense
                                 bool is_inner_sensor);
         void Reset();
 
-        int FindIndex(std::vector<int> v, int k) const;
-        bool InVector(std::vector<int> v, int k) const;
         void ApplySlideAssist(sensor_id sensorId);
         void DisplayDebug() const;
     };

@@ -52,6 +52,9 @@
     <ClInclude Include="include\MaiSense\Config.hpp">
       <Filter>Headers</Filter>
     </ClInclude>
+    <ClInclude Include="Helpers.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Sensor.cpp">
@@ -79,6 +82,9 @@
       <Filter>Sources</Filter>
     </ClCompile>
     <ClCompile Include="src\SensorProcessor.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Helpers.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
   </ItemGroup>
