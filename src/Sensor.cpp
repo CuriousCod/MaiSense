@@ -168,12 +168,12 @@ namespace MaiSense
         return SetSensorState(sensorId, false);
     }
 
-    bool Sensor::ProcessQueue()
+    bool Sensor::ProcessTouchEventQueue()
     {
         int ev_count = 0;
         auto it = sensor_event_queue_.begin();
-        bool assisted = false;
-        
+        bool applied_touch_assist = false;
+
         // Process all current input events
         while (it != sensor_event_queue_.end())
         {
@@ -182,116 +182,15 @@ namespace MaiSense
             // Check if the touch input is hitting the screen. If this is false the touch input is gone
             if (sensor_event.state)
             {
-                const bool is_inner_sensor = std::find(std::begin(inner_sensors_), std::end(inner_sensors_), sensor_event.sensor_id) != std::end(inner_sensors_);
-
-                // Add input to the sensor's vector
-                if (!InVector(sensor_touch_event_map_[sensor_event.sensor_id], sensor_event.event_id))
-                {
-                    sensor_touch_event_map_[sensor_event.sensor_id].push_back(sensor_event.event_id);
-
-                    if (config_.SlideRetrigger)
-                    {
-                        touch_point_map_[sensor_event.event_id] = sensor_event.touch_point; // Add input's current position to the map
-                    }
-
-                    if (is_inner_sensor)
-                    {
-                        SetSensorState(sensor_event.sensor_id, false); // Retrigger inner sensor every time, this helps with slides
-                    }
-
-                    /*
-                    else if (touchPoints[message.SensorId].size() > 2)
-                    {
-                        SetSensorState(message.SensorId, false); // Retrigger sensor when more than two inputs are hitting it, this helps with slides
-                    }
-                    */
-
-                    SetSensorState(sensor_event.sensor_id, true); // Activate sensor
-
-                    // Clear touch event from other sensors, the event should be hitting only one sensor at a time
-                    for (const auto& sensor_id : sensors_)
-                    {
-                        if (sensor_id == sensor_event.sensor_id)
-                        {
-                            continue;
-                        }
-
-                        int index = FindIndex(sensor_touch_event_map_[sensor_id], sensor_event.event_id);
-
-                        if (index == -1)
-                        {
-                            continue;
-                        }
-
-                        sensor_touch_event_map_[sensor_id].erase(sensor_touch_event_map_[sensor_id].begin() + index);
-
-                        if (sensor_touch_event_map_[sensor_id].empty())
-                        {
-                            SetSensorState(sensor_id, false); // Deactivate sensor if there are no more inputs hitting it
-                        }
-
-                        break; // Event should only exist on one sensor
-
-                        //touchPoints[sensorId].remove(message.eventId);
-                    }
-                }
-                else
-                {
-                    // Check if input has moved enough to retrigger sensor
-                    if (config_.SlideRetrigger)
-                    {
-                        if (abs(abs(touch_point_map_[sensor_event.event_id].X) - abs(sensor_event.touch_point.X)) > config_.SlideRetriggerDistance)
-                        {
-                            if (abs(abs(touch_point_map_[sensor_event.event_id].Y) - abs(sensor_event.touch_point.Y)) > config_.SlideRetriggerDistance)
-                            {
-                                SetSensorState(sensor_event.sensor_id, false);
-                                SetSensorState(sensor_event.sensor_id, true);
-
-                                touch_point_map_[sensor_event.event_id] = sensor_event.touch_point; // Reset comparison point
-                            }
-                        }
-                    }
-                }
-
-                // Trigger adjacent sensors if Slide Assist is enabled and one of the inner sensors is touched
-                if (config_.SlideAssist)
-                {
-                    if (is_inner_sensor)
-                    {
-                        assisted = true;
-                        SlideAssist(sensor_event.sensor_id);
-                    }
-                }
+                applied_touch_assist = ProcessTouchEvent(sensor_event);
             }
 
             // When the touch input is no longer hitting the screen, remove the input event id from all sensors
             else
             {
-                touch_point_map_.erase(sensor_event.event_id); // Erase input position information from the map
-
-                // Remove event from sensors' vector
-                for (const auto& sensor_id : sensors_)
-                {
-                    const int index = FindIndex(sensor_touch_event_map_[sensor_id], sensor_event.event_id);
-
-                    if (index == -1)
-                    {
-                        continue;
-                    }
-
-                    sensor_touch_event_map_[sensor_id].erase(sensor_touch_event_map_[sensor_id].begin() + index);
-
-                    if (sensor_touch_event_map_[sensor_id].empty())
-                    {
-                        SetSensorState(sensor_id, false); // Deactivate sensor if there are no more inputs hitting it
-                    }
-
-                    break; // Event should only exist on one sensor
-
-                    //touchPoints[sensorId].remove(message.eventId);
-                }
+                ClearTouchEventFromSensors(sensor_event);
             }
-            
+
             // Clear the event from the process queue
             it = sensor_event_queue_.erase(it);
 
@@ -299,7 +198,7 @@ namespace MaiSense
         }
 
         // Clear the extra sensor activations generated by Slide Assist
-        if (config_.SlideAssist && assisted)
+        if (applied_touch_assist)
         {
             for (const auto& sensor_id : sensors_)
             {
@@ -313,6 +212,129 @@ namespace MaiSense
         }
 
         return ev_count > 0;
+    }
+
+    bool Sensor::ProcessTouchEvent(const std::vector<Sensor::sensor_event>::value_type& sensor_event)
+    {
+        const bool is_inner_sensor = std::find(std::begin(inner_sensors_), std::end(inner_sensors_), sensor_event.sensor_id) != std::end(inner_sensors_);
+
+        // Add input to the sensor's vector
+        if (!InVector(sensor_touch_event_map_[sensor_event.sensor_id], sensor_event.event_id))
+        {
+            RegisterTouchEvent(sensor_event, is_inner_sensor);
+        }
+        else
+        {
+            // Check if input has moved enough to retrigger the sensor
+            CheckForRetrigger(sensor_event);
+        }
+
+        // Trigger adjacent sensors if Slide Assist is enabled and one of the inner sensors is touched
+        const bool apply_slide_assist = config_.SlideAssist && is_inner_sensor;
+
+        if (apply_slide_assist)
+        {
+            ApplySlideAssist(sensor_event.sensor_id);
+        }
+
+        return apply_slide_assist;
+    }
+
+    void Sensor::RegisterTouchEvent(const std::vector<Sensor::sensor_event>::value_type& sensor_event, const bool is_inner_sensor)
+    {
+        sensor_touch_event_map_[sensor_event.sensor_id].push_back(sensor_event.event_id);
+
+        if (config_.SlideRetrigger)
+        {
+            touch_point_map_[sensor_event.event_id] = sensor_event.touch_point; // Add input's current position to the map
+        }
+
+        if (is_inner_sensor)
+        {
+            SetSensorState(sensor_event.sensor_id, false); // Retrigger inner sensor every time, this helps with slides
+        }
+
+        /*
+        else if (touchPoints[message.SensorId].size() > 2)
+        {
+            SetSensorState(message.SensorId, false); // Retrigger sensor when more than two inputs are hitting it, this helps with slides
+        }
+        */
+
+        SetSensorState(sensor_event.sensor_id, true); // Activate sensor
+
+        // Clear touch event from other sensors, the event should be hitting only one sensor at a time
+        for (const auto& sensor_id : sensors_)
+        {
+            if (sensor_id == sensor_event.sensor_id)
+            {
+                continue;
+            }
+
+            int index = FindIndex(sensor_touch_event_map_[sensor_id], sensor_event.event_id);
+
+            if (index == -1)
+            {
+                continue;
+            }
+
+            sensor_touch_event_map_[sensor_id].erase(sensor_touch_event_map_[sensor_id].begin() + index);
+
+            if (sensor_touch_event_map_[sensor_id].empty())
+            {
+                SetSensorState(sensor_id, false); // Deactivate sensor if there are no more inputs hitting it
+            }
+
+            break; // Event should only exist on one sensor
+
+            //touchPoints[sensorId].remove(message.eventId);
+        }
+    }
+
+    void Sensor::CheckForRetrigger(const std::vector<Sensor::sensor_event>::value_type& sensor_event)
+    {
+        if (!config_.SlideRetrigger)
+        {
+            return;
+        }
+
+        if (abs(abs(touch_point_map_[sensor_event.event_id].X) - abs(sensor_event.touch_point.X)) > config_.SlideRetriggerDistance)
+        {
+            if (abs(abs(touch_point_map_[sensor_event.event_id].Y) - abs(sensor_event.touch_point.Y)) > config_.SlideRetriggerDistance)
+            {
+                SetSensorState(sensor_event.sensor_id, false);
+                SetSensorState(sensor_event.sensor_id, true);
+
+                touch_point_map_[sensor_event.event_id] = sensor_event.touch_point; // Reset comparison point
+            }
+        }
+    }
+
+    void Sensor::ClearTouchEventFromSensors(const std::vector<sensor_event>::value_type& sensor_event)
+    {
+        touch_point_map_.erase(sensor_event.event_id); // Erase input position information from the map
+
+        // Remove event from sensors' vector
+        for (const auto& sensor_id : sensors_)
+        {
+            const int index = FindIndex(sensor_touch_event_map_[sensor_id], sensor_event.event_id);
+
+            if (index == -1)
+            {
+                continue;
+            }
+
+            sensor_touch_event_map_[sensor_id].erase(sensor_touch_event_map_[sensor_id].begin() + index);
+
+            if (sensor_touch_event_map_[sensor_id].empty())
+            {
+                SetSensorState(sensor_id, false); // Deactivate sensor if there are no more inputs hitting it
+            }
+
+            break; // Event should only exist on one sensor
+
+            //touchPoints[sensorId].remove(message.eventId);
+        }
     }
 
     void Sensor::Reset()
@@ -360,7 +382,7 @@ namespace MaiSense
         return std::find(v.begin(), v.end(), k) != v.end();
     }
 
-    void Sensor::SlideAssist(sensor_id sensorId)
+    void Sensor::ApplySlideAssist(sensor_id sensorId)
     {
         // Triggers sensors adjacent to the current sensor
         // Helps with inaccurate touch screens

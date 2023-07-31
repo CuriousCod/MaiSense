@@ -168,7 +168,7 @@ namespace MaiSense
         GetSensor()->Reset();
         // GetSensor()->DisplayDebug();
         const auto result = TrueGameInput();
-        GetSensor()->ProcessQueue();
+        GetSensor()->ProcessTouchEventQueue();
 
         return result;
     }

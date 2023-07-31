@@ -38,10 +38,10 @@ namespace MaiSense
         int* inactive_sensor_flags_;
         std::unordered_map<sensor_id, bool> sensor_states_;
 
-        // Add a new variable to track the inputs the sensors are currently receiving
+        // Stores the input events currently triggering the sensors
         std::unordered_map<sensor_id, std::vector<event_id>> sensor_touch_event_map_;
 
-        // Position of the input event
+        // Stores the position of the input event
         std::unordered_map<event_id, Point> touch_point_map_;
 
         std::vector<sensor_event> sensor_event_queue_;
@@ -125,14 +125,19 @@ namespace MaiSense
 
         bool Activate(sensor_id sensorId);
         bool Deactivate(sensor_id sensorId);
+        bool ProcessTouchEvent(const std::vector<Sensor::sensor_event>::value_type& sensor_event);
+        void ClearTouchEventFromSensors(const std::vector<Sensor::sensor_event>::value_type& sensor_event);
         bool Remove(sensor_id sensorId, bool value);
 
-        bool ProcessQueue();
+        bool ProcessTouchEventQueue();
+        void CheckForRetrigger(const std::vector<Sensor::sensor_event>::value_type& sensor_event);
+        void RegisterTouchEvent(const std::vector<Sensor::sensor_event>::value_type& sensor_event,
+                                bool is_inner_sensor);
         void Reset();
 
         int FindIndex(std::vector<int> v, int k) const;
         bool InVector(std::vector<int> v, int k) const;
-        void SlideAssist(sensor_id sensorId);
+        void ApplySlideAssist(sensor_id sensorId);
         void DisplayDebug() const;
     };
 }
