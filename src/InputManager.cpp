@@ -33,7 +33,8 @@ namespace MaiSense
 
     HHOOK   InputManager::hHook;
     HWND    InputManager::hWnd;
-    Sensor *InputManager::sensor;
+    Sensor *InputManager::p1_sensor;
+    Sensor *InputManager::p2_sensor;
     std::vector<InputController*> InputManager::controllers;
 
     void InputManager::Hook()
@@ -66,14 +67,25 @@ namespace MaiSense
         return false;
     }
 
-    Sensor *InputManager::GetSensor()
+    Sensor *InputManager::GetSensorsP1()
     {
-        if (!sensor)
+        if (!p1_sensor)
         {
-            sensor = new Sensor();
+            p1_sensor = new Sensor();
         }
 
-        return sensor;
+        return p1_sensor;
+    }
+
+    Sensor *InputManager::GetSensorsP2()
+    {
+        if (!p2_sensor)
+        {
+            p2_sensor = new Sensor();
+            p2_sensor->ConnectP2(true);
+        }
+
+        return p2_sensor;
     }
 
     HHOOK InputManager::GetHookHandle()
@@ -165,10 +177,16 @@ namespace MaiSense
     
     DWORD __stdcall InputManager::HookGameInput()
     {
-        GetSensor()->Reset();
-        // GetSensor()->DisplayDebug();
+        GetSensorsP1()->Reset();
+        // GetSensorsP2()->Reset();
+
+        // GetSensorsP1()->DisplayDebug();
+        // GetSensorsP2()->DisplayDebug();
+
         const auto result = TrueGameInput();
-        GetSensor()->ProcessTouchEventQueue();
+
+        GetSensorsP1()->ProcessTouchEventQueue();
+        // GetSensorsP2()->ProcessTouchEventQueue();
 
         return result;
     }

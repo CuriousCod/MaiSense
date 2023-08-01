@@ -116,6 +116,7 @@ namespace MaiSense
         ~Sensor();
 
         bool Connect();
+        bool ConnectP2(bool force);
         bool SetSensorState(sensor_id sensor_id, bool state);
         void SetSensorStateAsync(sensor_id sensor_id, bool value);
         bool GetSensorState(sensor_id sensorId);

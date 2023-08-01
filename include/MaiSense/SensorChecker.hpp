@@ -49,6 +49,8 @@ namespace MaiSense
 		~SensorChecker();
 
 		void AddRegion(sensor_id sensorId, const SensorRegion& region);
+		void AddOffsetToAllRegions(const Point& offset);
+
 		void RemoveRegion(sensor_id sensorId);
 		bool Check(Point position, sensor_id sensor_id);
 

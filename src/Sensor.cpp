@@ -32,9 +32,31 @@ namespace MaiSense
         if (input)
         {
             // Read sensor flag from given address
-            // TODO: Add P2 Support(?)
             active_sensor_flags_ = (int*)(input + P1_OFFSET_ACTIVE_ADDRESS);
             inactive_sensor_flags_ = (int*)(input + P1_OFFSET_INACTIVE_ADDRESS);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    bool Sensor::ConnectP2(const bool force)
+    {
+        // Process hook is created, no need to recreate
+        if (active_sensor_flags_ && inactive_sensor_flags_ && !force)
+        {
+            return true;
+        }
+
+        // Lookup for sensor addresses
+        int input = *(int*)TOUCH_POINTER_ADDRESS;
+
+        if (input)
+        {
+            // Read sensor flag from given address
+            active_sensor_flags_ = (int*)(input + P2_OFFSET_ACTIVE_ADDRESS);
+            inactive_sensor_flags_ = (int*)(input + P2_OFFSET_INACTIVE_ADDRESS);
 
             return true;
         }

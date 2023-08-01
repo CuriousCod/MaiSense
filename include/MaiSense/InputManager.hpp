@@ -16,7 +16,8 @@ namespace MaiSense
     private:
         static HHOOK   hHook;
         static HWND    hWnd;
-        static Sensor *sensor;
+        static Sensor *p1_sensor;
+        static Sensor *p2_sensor;
         static std::vector<InputController*> controllers;
 
         static LRESULT WINAPI GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam);
@@ -43,7 +44,8 @@ namespace MaiSense
 
         static bool Install(InputController *controller);
 
-        static Sensor *GetSensor();
+        static Sensor *GetSensorsP1();
+        static Sensor *GetSensorsP2();
         static HHOOK   GetHookHandle();
         static HWND    GetGameWindow();
     };

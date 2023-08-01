@@ -93,6 +93,24 @@ namespace MaiSense
 		}
 	}
 
+	void SensorChecker::AddOffsetToAllRegions(const Point& offset)
+	{
+		for (auto& region : this->regionMap)
+		{
+			std::vector<Point> points = {};
+
+			for (auto& point : region.second.GetPoints())
+			{
+				point.X += offset.X;
+				point.Y += offset.Y;
+
+				points.push_back(point);
+			}
+
+			region.second.SetPoints(points);
+		}
+	}
+
 	void SensorChecker::AddRegion(sensor_id sensorId, const SensorRegion& region)
 	{
 		this->regionMap.insert(std::pair<sensor_id, SensorRegion>(sensorId, region));

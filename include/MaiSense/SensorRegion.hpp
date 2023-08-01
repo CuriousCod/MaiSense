@@ -28,6 +28,8 @@ namespace MaiSense
 
 		void AddPoint(const Point& point);
 		bool Test(const Point& test_point, float scale_x = 1.0, float scale_y = 1.0f) const;
+		std::vector<Point> GetPoints() const;
+		void SetPoints(const std::vector<Point>& new_points);
 	};
 }
 

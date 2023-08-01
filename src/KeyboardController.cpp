@@ -48,7 +48,7 @@ namespace MaiSense
         // Set keyboard eventIds to start from -3 and decrease, this will avoid conflicts with the touch events
         // Trigger point will be always static (1,1)
 
-        const auto sensor = InputManager::GetSensor();
+        const auto sensor = InputManager::GetSensorsP1();
         switch (ev.KeyCode)
         {
             case 0x30: // 0

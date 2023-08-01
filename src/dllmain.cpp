@@ -13,12 +13,14 @@ using namespace MaiSense;
 TouchController     touch_controller;
 KeyboardController  keyboard_controller;
 MouseController     mouse_controller;
-SensorChecker       sensor_checker;
-SensorProcessor     processor;
+SensorChecker       sensor_checker_p1;
+SensorChecker       sensor_checker_p2;
+SensorProcessor     processor_p1;
+SensorProcessor     processor_p2;
+bool                initialized    = false;
 
-void process_touch_input(const TouchEvent ev)
+void initialize_sensors(SensorChecker& sensor_checker, SensorProcessor& sensor_processor, const bool& is_player2)
 {
-    processor.HandleTouchEvent(ev);
     if (sensor_checker.GetScreenWidth() == 0 || sensor_checker.GetScreenHeight() == 0)
     {
         RECT client_rect;
@@ -30,50 +32,63 @@ void process_touch_input(const TouchEvent ev)
         );
     }
 
-    if (processor.GetChecker() == nullptr)
+    if (sensor_processor.GetChecker() == nullptr)
     {
-        processor.SetChecker(&sensor_checker);
+        sensor_processor.SetChecker(&sensor_checker);
+
+        if (is_player2)
+        {
+            // TODO This is a fixed offset for now
+            auto offset = Point();
+            offset.X = 1080;
+            offset.Y = 0;
+            sensor_checker.AddOffsetToAllRegions(offset);
+        }
     }
 
-    if (processor.GetSensor() == nullptr)
+    if (sensor_processor.GetSensor() == nullptr)
     {
-        processor.SetSensor(InputManager::GetSensor());
+        Sensor* sensors = is_player2 ? InputManager::GetSensorsP2() : InputManager::GetSensorsP1();
+
+        sensor_processor.SetSensor(sensors);
     }
+}
+
+void process_touch_input(const TouchEvent ev)
+{
+    processor_p1.HandleTouchEvent(ev);
+    // processor_p2.HandleTouchEvent(ev);
+
+    if (initialized)
+    {
+        return;
+    }
+
+    initialize_sensors(sensor_checker_p1, processor_p1, false);
+    // initialize_sensors(sensor_checker_p2, processor_p2, true);
+
+    initialized = true;
 }
 
 void process_mouse_input(const MouseEvent ev)
 {
-    // Disabled mouse touch emulation as it won't work with the current setup
-
-    /*
     if (ev.MButton)
     {
-        mouseController.EmulateTouch();
+        mouse_controller.EmulateTouch();
     }
-    */
 
-    processor.HandleMouseEvent(ev);
+    processor_p1.HandleMouseEvent(ev);
+    // processor_p2.HandleMouseEvent(ev);
 
-    if (sensor_checker.GetScreenWidth() == 0 || sensor_checker.GetScreenHeight() == 0)
+    if (initialized)
     {
-        RECT client_rect;
-        GetClientRect(InputManager::GetGameWindow(), &client_rect);
-        sensor_checker.SetScreenSize
-        (
-            client_rect.left + client_rect.right,
-            client_rect.top + client_rect.bottom
-        );
+        return;
     }
 
-    if (processor.GetChecker() == nullptr)
-    {
-        processor.SetChecker(&sensor_checker);
-    }
+    initialize_sensors(sensor_checker_p1, processor_p1, false);
+    // initialize_sensors(sensor_checker_p2, processor_p2, true);
 
-    if (processor.GetSensor() == nullptr)
-    {
-        processor.SetSensor(InputManager::GetSensor());
-    }
+    initialized = true;
 }
 
 BOOL APIENTRY DllMain(HMODULE hMod, DWORD cause, LPVOID lpReserved)
@@ -96,7 +111,7 @@ BOOL APIENTRY DllMain(HMODULE hMod, DWORD cause, LPVOID lpReserved)
         InputManager::Hook();
         InputManager::Install(&touch_controller);
         InputManager::Install(&keyboard_controller);
-        // InputManager::Install(&mouseController); // Also disabled the rest of the mouse events, as they generate a ton of touch events when using a touch screen
+        // InputManager::Install(&mouse_controller); // Disabled mouse events, as they generate a ton of touch events when using a touch screen
     }
     else if (cause == DLL_PROCESS_DETACH)
     {

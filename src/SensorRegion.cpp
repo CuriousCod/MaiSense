@@ -113,4 +113,14 @@ namespace MaiSense
 
         return false;
     }
+
+    std::vector<Point> SensorRegion::GetPoints() const
+    {
+        return this->points;
+    }
+
+    void SensorRegion::SetPoints(const std::vector<Point>& new_points)
+    {
+        points = new_points;
+    }
 }
